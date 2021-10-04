@@ -2,7 +2,7 @@
   "name": "android-emulator-helper",
 	"displayName": "Android Emulator Helper",
 	"description": "Android Emulator Helper makes it easy to manage Android emulators.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"icon": "images/logo.png",
 	"engines": {
 		"vscode": "^1.60.0"
