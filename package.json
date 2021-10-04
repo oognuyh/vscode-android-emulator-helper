@@ -3,9 +3,13 @@
 	"displayName": "Android Emulator Helper",
 	"description": "just an android emulator helper",
 	"version": "0.0.1",
+	"icon": "images/logo.png",
 	"engines": {
 		"vscode": "^1.60.0"
+	},"author": {
+		"name": "Hyungoo Kang"
 	},
+	"publisher": "oognuyh",
 	"categories": [
 		"Other"
 	],
@@ -14,7 +18,8 @@
 		"onCommand:android-emulator-helper.uninstall-packages",
         "onCommand:android-emulator-helper.create-avd",
 		"onCommand:android-emulator-helper.delete-avd",
-		"onCommand:android-emulator-helper.run-emulator"
+		"onCommand:android-emulator-helper.run-emulator",
+		"onCommand:android-emulator-helper.update-all-installed-packages"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -38,6 +43,10 @@
 			{
 				"command": "android-emulator-helper.run-emulator",
 				"title": "Android Emulator Helper: Run Emulator"
+			},
+			{
+				"command": "android-emulator-helper.update-all-installed-packages",
+				"title": "Android Emulator Helper: Update All Installed Packages"
 			}
 		]
 	},
@@ -61,5 +70,13 @@
 		"mocha": "^9.1.1",
 		"typescript": "^4.4.3",
 		"@vscode/test-electron": "^1.6.2"
+	},
+	"bugs": {
+		"email": "oognuyh@gmail.com",
+		"url": "https://github.com/oognuyh/vscode-android-emulator-helper/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oognuyh/vscode-android-emulator-helper.git"
 	}
 }

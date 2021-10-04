@@ -1,70 +1,64 @@
-# android-emulator-helper README
+# <img src="https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/logo.png" width="48" height="48" /> Android Emulator Helper
 
-This is the README for your extension "android-emulator-helper". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension that makes it easy to manage Android emulators.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+| Create AVD | Delete AVD | Run Emulator |
+|:---:|:---:|:---:|
+| ![][create-avd] | ![][delete-avd] | ![][run-emulator] |
 
-For example if there is an image subfolder under your extension project workspace:
+| Install Packages | Uninstall Packages | Update Installed Packages |
+|:---:|:---:|:---:|
+|![][install-packages] |![][uninstall-packages] | ![][update-installed-packages] |
 
-\!\[feature X\]\(images/feature-x.png\)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+> Note: If you encounter problems with SDK licenses, you can accept by clicking the ok button in the message. Please try again after this.
+
+## Quick Start
+
+- Install [Android Emulator Helper](https://marketplace.visualstudio.com/items?itemName=oognuyh.android-emulator-helper) extension.
+- Open Cammand Palette (`Ctrl + Shift + p`).
+- type Android Emulator Helper and choose a command.
+    - Android Emulator Helper: Run Emulator
+    - Android Emulator Helper: Create New AVD
+    - Android Emulator Helper: Delete AVD
+    - Android Emulator Helper: Install Packages
+    - Android Emulator Helper: Uninstall Packages
+    - Android Emulator Helper: Update All Installed Packages
+
+## Settings Options
+
+- android-emulator-helper.emulator-run-opts
+
+    You can run your emulator with additional options. such as removing boot animation or resolution.
+    Please refer to following page: [emulator options](https://android-doc.github.io/tools/help/emulator.html)
+
+
+- android-emulator-helper.avd-creation-opts
+
+    You can create your AVD with additional options. such as setting up a specific device.
+    Please refer to following page: [avdmanager options](https://android-doc.github.io/tools/devices/managing-avds-cmdline.html)
+
+- Example
+    ```
+    "android-emulator-helper": {
+        "emulator-run-opts": "-no-boot-anim -wipe-data",
+        "avd-creation-opts": "-d 30"
+    }
+    ```
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Android SDK
+- Enviroment PATH vairable
+    - cmdline-tools/latest/bin or tools/bin
+    - emulator
+    - platform-tools
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+[create-avd]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/create-avd.gif
+[delete-avd]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/delete-avd.gif
+[run-emulator]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/run-emulator.gif
+[install-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/install-packages.gif
+[uninstall-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/uninstall-packages.gif
+[update-installed-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/update-installed-packages.gif
