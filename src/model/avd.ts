@@ -17,20 +17,23 @@ export class Avd implements QuickPickItem {
     this.basedOn = this.detail = basedOn;
   }
 
-  static from(raw: string): Avd {
-    /*
-     *      Name: PIXEL_XL_28
-     *    Device: pixel (Google)
-     *      Path: /home/$USER/.android/avd/PIXEL_XL_28.avd
-     *    Target: Google APIs (Google Inc.)
-     *  Based on: Android 9.0 (Pie) Tag/ABI: google_apis/x86
-     *    Sdcard: 512 MB
-     */
-    const [name, device, path, target, basedOn, sdCard]: string[] = raw
-      .trim()
-      .split("\n")
-      .map((row) => row.split(":")[1].trim());
+  static from(rawAvd: string): Avd {
+    const name: string =
+      rawAvd
+        .match(/name: (.)+/i)
+        ?.shift()
+        ?.replace(/name: /i, "") || "";
+    const device: string =
+      rawAvd
+        .match(/device: (.)+/gi)
+        ?.shift()
+        ?.replace(/device: /i, "") || "";
+    const basedOn: string =
+      rawAvd
+        .match(/based on: (.)+Tag\/ABI/i)
+        ?.shift()
+        ?.replace(/based on: |tag\/abi/gi, "") || "";
 
-    return new Avd(name, device, basedOn.replace("Tag/ABI", "").trim());
+    return new Avd(name, device, basedOn);
   }
 }

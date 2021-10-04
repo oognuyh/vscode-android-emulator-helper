@@ -9,13 +9,16 @@ export class Package implements QuickPickItem {
   path: string;
   version: string;
 
-  constructor(rawPackage: string, rawInstalledPackages: string) {
-    const cols = rawPackage.split("|").map((col) => col.trim());
-
-    this.path = this.label = cols[0];
-    this.version = cols[1];
-    this.description = cols[2];
-    this.isInstalled = rawInstalledPackages.includes(this.label);
+  constructor(
+    path: string,
+    version: string,
+    description: string,
+    isInstalled: boolean
+  ) {
+    this.path = this.label = path;
+    this.version = version;
+    this.description = description;
+    this.isInstalled = isInstalled;
 
     if (this.isInstalled) {
       this.detail = "installed";
@@ -23,6 +26,15 @@ export class Package implements QuickPickItem {
   }
 
   static from(rawPackage: string, rawInstalledPackages: string): Package {
-    return new Package(rawPackage, rawInstalledPackages);
+    const [path, version, description, ...etc]: string[] = rawPackage
+      .split("|")
+      .map((col) => col.trim());
+
+    return new Package(
+      path,
+      version,
+      description,
+      rawInstalledPackages.includes(path)
+    );
   }
 }
