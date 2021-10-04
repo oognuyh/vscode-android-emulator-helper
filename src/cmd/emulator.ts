@@ -23,14 +23,14 @@ export async function runEmulator() {
     return;
   }
 
-  const additonalRunOpts: string =
+  const additonalEmulatorRunOpts: string =
     workspace
       .getConfiguration("android-emulator-helper")
-      .get("additional-run-opts") || "";
+      .get("emulator-run-opts") || "";
 
   window.withProgress(
     {
-      location: ProgressLocation.Window,
+      location: ProgressLocation.Notification,
     },
     async (progress) => {
       await new Promise((resolve) => {
@@ -40,24 +40,23 @@ export async function runEmulator() {
           });
         });
 
-        exec(
-          `emulator @${selectedAvd.name} -no-boot-anim ${additonalRunOpts}`,
-          async (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              window.showErrorMessage(`Failed to run ${selectedAvd.name}.`);
-            }
+        const command: string = `emulator @${selectedAvd.name} ${additonalEmulatorRunOpts} > /dev/null 2>&1 &`;
 
-            clearInterval(interval);
-            progress.report({
-              message: `${selectedAvd.name} is successfully loaded.`,
-            });
-
-            setTimeout(() => {
-              resolve(undefined);
-            }, 1000);
+        exec(command, async (error, stdout, stderr) => {
+          if (error) {
+            console.error(stderr);
+            window.showErrorMessage(`Failed to run ${command}.`);
           }
-        );
+
+          clearInterval(interval);
+          progress.report({
+            message: `${selectedAvd.name} is successfully loaded.`,
+          });
+
+          setTimeout(() => {
+            resolve(undefined);
+          }, 1000);
+        });
       });
     }
   );

@@ -1,5 +1,5 @@
 import { exec, execSync } from "child_process";
-import { ProgressLocation, window } from "vscode";
+import { ProgressLocation, window, workspace } from "vscode";
 import { Avd } from "../model/avd";
 import { Package } from "../model/package";
 import { showAutocloseMessage } from "../utils";
@@ -53,6 +53,11 @@ export async function createAvd() {
     return;
   }
 
+  const additionalAvdCreationOpts: string =
+    workspace
+      .getConfiguration("android-emulator-helper")
+      .get("avd-creation-opts") || "";
+
   window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -64,27 +69,25 @@ export async function createAvd() {
           progress.report({ message: `${newAvdName} is being created.` });
         }, 1000);
 
-        exec(
-          `echo no | avdmanager create avd -n ${newAvdName} -k "${selectedPackage.path}" -f`,
-          (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              window.showErrorMessage("command not found: avdmanager");
-            }
+        const command: string = `echo no | avdmanager create avd -n ${newAvdName} -k "${selectedPackage.path}" -f ${additionalAvdCreationOpts}`;
 
-            console.log(stdout);
-            clearInterval(interval);
-            progress.report({
-              message: error
-                ? "Failed to create AVD."
-                : "AVD created successfully.",
-            });
-
-            setTimeout(() => {
-              resolve(undefined);
-            }, 2000);
+        exec(command, (error, stdout, stderr) => {
+          if (error) {
+            console.error(stderr);
+            window.showErrorMessage(`Failed to execute ${command}.`);
           }
-        );
+
+          clearInterval(interval);
+          progress.report({
+            message: error
+              ? `Failed to create ${newAvdName}.`
+              : `${newAvdName} created successfully.`,
+          });
+
+          setTimeout(() => {
+            resolve(undefined);
+          }, 2000);
+        });
       });
     }
   );
@@ -102,7 +105,7 @@ export async function deleteAvd() {
   const selectedAvd: Avd | undefined = await window.showQuickPick(
     availableAvds,
     {
-      placeHolder: "Select a AVD name",
+      placeHolder: "Select AVD name",
       canPickMany: false,
     }
   );
@@ -126,8 +129,8 @@ export async function deleteAvd() {
           `avdmanager delete avd -n ${selectedAvd.name}`,
           (error, stdout, stderr) => {
             if (error) {
-              console.log(stderr);
-              window.showErrorMessage("command not found: avdmanager");
+              console.error(stderr);
+              window.showErrorMessage(`Failed to delete ${selectedAvd.name}.`);
             }
 
             clearInterval(interval);
@@ -152,8 +155,6 @@ export async function getAvailableAvds(): Promise<Avd[] | undefined> {
     const stdout = Buffer.from(execSync("avdmanager list avd"))
       .toString()
       .replace("Available Android Virtual Devices:\n", "");
-
-    console.log(stdout);
 
     const availableAvds: Avd[] | undefined = stdout
       .split("---------\n")
