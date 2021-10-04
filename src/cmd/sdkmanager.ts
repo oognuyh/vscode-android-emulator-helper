@@ -5,9 +5,30 @@ import { showAutocloseMessage } from "../utils";
 
 export async function getAvaliablePackages(): Promise<Package[] | undefined> {
   try {
-    const stdout = Buffer.from(
-      execSync(`sdkmanager --list --channel=0`)
-    ).toString();
+    const stdout: string = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+      },
+      (progress) => {
+        return new Promise((resolve, reject) => {
+          const interval = setInterval(() => {
+            progress.report({
+              message: "Loading available packages...",
+            });
+          });
+
+          exec("sdkmanager --list", (error, stdout, stderr) => {
+            if (error) {
+              console.error(stderr);
+              reject();
+            }
+
+            clearInterval(interval);
+            resolve(stdout);
+          });
+        });
+      }
+    );
 
     // parse
     const [rawInstalledPackages, rawPackages] = stdout.split(
@@ -73,7 +94,7 @@ export async function installPackages() {
                   if (error) {
                     console.error(stderr);
 
-                    if (stderr.includes("SDK license agreements")) {
+                    if (stderr.includes("license")) {
                       // if user need to accept the licenses
                       clearInterval(interval);
                       reject();
@@ -115,6 +136,7 @@ export async function installPackages() {
                   progress.report({
                     increment: (1 / numOfSelectedPackages) * 100,
                   });
+
                   isProcessing = false;
                 }
               );
@@ -140,9 +162,31 @@ export async function getInstalledPackages(
   filter: string | undefined = undefined
 ): Promise<Package[] | undefined> {
   try {
-    const stdout: string = Buffer.from(
-      execSync(`sdkmanager --list_installed`)
-    ).toString();
+    // load installed packages
+    const stdout: string = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+      },
+      (progress) => {
+        return new Promise((resolve, reject) => {
+          const interval = setInterval(() => {
+            progress.report({
+              message: "Loading installed packages...",
+            });
+          });
+
+          exec("sdkmanager --list_installed", (error, stdout, stderr) => {
+            if (error) {
+              console.error(stderr);
+              reject();
+            }
+
+            clearInterval(interval);
+            resolve(stdout);
+          });
+        });
+      }
+    );
 
     // parse
     let installedPackages: Package[] | undefined = [
@@ -241,6 +285,74 @@ export async function uninstallPackages() {
             }
           }
         }, 500);
+      });
+    }
+  );
+}
+
+export async function updateAllInstalledPackages() {
+  await window.withProgress(
+    {
+      location: ProgressLocation.Notification,
+    },
+    async (progress) => {
+      await new Promise((resolve, reject) => {
+        const interval = setInterval(() => {
+          progress.report({
+            message: "All installed packages are being updated.",
+          });
+        }, 500);
+
+        exec(
+          "echo yes | sdkmanager --update --channel=0",
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(stderr);
+
+              if (stderr.includes("license")) {
+                // if user need to accept the licenses
+                clearInterval(interval);
+                reject();
+
+                window
+                  .showErrorMessage(
+                    "You need to accept the licenses before building. You want to accept now?",
+                    ...["OK", "Later"]
+                  )
+                  .then((selection) => {
+                    if (selection === "OK") {
+                      const result = execSync(
+                        "echo yes | sdkmanager --licenses"
+                      ).toString();
+
+                      if (result.includes("accepted")) {
+                        window.showInformationMessage(
+                          "All SDK package licenses accepted. Please try to update again."
+                        );
+                      } else {
+                        window.showErrorMessage(
+                          "Can't accept the licenses. Please try manually."
+                        );
+                      }
+                    }
+                  });
+              } else {
+                window.showErrorMessage(`Failed to update the packages.`);
+              }
+            }
+
+            clearInterval(interval);
+            progress.report({
+              message: stdout.includes("No updates available")
+                ? "No updateds available."
+                : "All pacakges updated successfully.",
+            });
+
+            setTimeout(() => {
+              resolve(undefined);
+            }, 2000);
+          }
+        );
       });
     }
   );

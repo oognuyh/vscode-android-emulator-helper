@@ -1,4 +1,5 @@
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
+import { clearInterval } from "timers";
 import { ProgressLocation, window, workspace } from "vscode";
 import { Avd } from "../model/avd";
 import { Package } from "../model/package";
@@ -152,11 +153,33 @@ export async function deleteAvd() {
 
 export async function getAvailableAvds(): Promise<Avd[] | undefined> {
   try {
-    const stdout = Buffer.from(execSync("avdmanager list avd"))
-      .toString()
-      .replace("Available Android Virtual Devices:\n", "");
+    const stdout: string = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+      },
+      async (progress) => {
+        return await new Promise((resolve, reject) => {
+          const interval = setInterval(() => {
+            progress.report({
+              message: "Loading available AVDs...",
+            });
+          });
+
+          exec("avdmanager list avd", (error, stdout, stderr) => {
+            if (error) {
+              console.error(stderr);
+              reject();
+            }
+
+            clearInterval(interval);
+            resolve(stdout);
+          });
+        });
+      }
+    );
 
     const availableAvds: Avd[] | undefined = stdout
+      .replace("Available Android Virtual Devices:\n", "")
       .split("---------\n")
       .map((rawAvailableAvd) => Avd.from(rawAvailableAvd));
 
