@@ -1,7 +1,7 @@
 {
   "name": "android-emulator-helper",
 	"displayName": "Android Emulator Helper",
-	"description": "just an android emulator helper",
+	"description": "Android Emulator Helper makes it easy to manage Android emulators.",
 	"version": "0.0.1",
 	"icon": "images/logo.png",
 	"engines": {
@@ -12,6 +12,13 @@
 	"publisher": "oognuyh",
 	"categories": [
 		"Other"
+	],
+	"keywords": [
+		"android",
+		"emulator",
+		"avd",
+		"sdk",
+		"helper"
 	],
 	"activationEvents": [
 		"onCommand:android-emulator-helper.install-packages",
