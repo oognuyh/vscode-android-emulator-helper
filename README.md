@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/logo.png" width="48" height="48" /> Android Emulator Helper
+# <img src="https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/logo.png" width="48" height="48" /> Android Emulator Helper [![Version](https://vsmarketplacebadge.apphb.com/version/oognuyh.android-emulator-helper.svg)](https://marketplace.visualstudio.com/items?itemName=oognuyh.android-emulator-helper) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/oognuyh.android-emulator-helper.svg)](https://marketplace.visualstudio.com/items?itemName=oognuyh.android-emulator-helper)
 
 A Visual Studio Code extension that makes it easy to manage Android emulators.
 
@@ -6,11 +6,11 @@ A Visual Studio Code extension that makes it easy to manage Android emulators.
 
 | Create AVD | Delete AVD | Run Emulator |
 |:---:|:---:|:---:|
-| ![][create-avd] | ![][delete-avd] | ![][run-emulator] |
+| ![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/create-avd.gif) | ![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/delete-avd.gif) | ![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/run-emulator.gif) |
 
 | Install Packages | Uninstall Packages | Update Installed Packages |
 |:---:|:---:|:---:|
-|![][install-packages] |![][uninstall-packages] | ![][update-installed-packages] |
+|![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/install-packages.gif) |![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/uninstall-packages.gif) | ![](https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/update-installed-packages.gif) |
 
 
 > Note: If you encounter problems with SDK licenses, you can accept by clicking the ok button in the message. Please try again after this.
@@ -51,14 +51,7 @@ A Visual Studio Code extension that makes it easy to manage Android emulators.
 ## Requirements
 
 - Android SDK
-- Enviroment PATH vairable
+- Enviroment PATH variable
     - cmdline-tools/latest/bin or tools/bin
     - emulator
     - platform-tools
-
-[create-avd]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/create-avd.gif
-[delete-avd]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/delete-avd.gif
-[run-emulator]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/run-emulator.gif
-[install-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/install-packages.gif
-[uninstall-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/uninstall-packages.gif
-[update-installed-packages]: https://raw.githubusercontent.com/oognuyh/vscode-android-emulator-helper/master/images/update-installed-packages.gif
