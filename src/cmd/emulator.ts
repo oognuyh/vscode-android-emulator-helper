@@ -1,7 +1,6 @@
-import { exec } from "child_process";
-import { ProgressLocation, window, workspace } from "vscode";
+import { window, workspace } from "vscode";
 import { Avd } from "../model/avd";
-import { showAutocloseMessage } from "../utils";
+import { commandWithProgress, showAutocloseMessage } from "../utils";
 import { getAvailableAvds } from "./avdmanager";
 
 export async function runEmulator() {
@@ -28,36 +27,11 @@ export async function runEmulator() {
       .getConfiguration("android-emulator-helper")
       .get("emulator-run-opts") || "";
 
-  window.withProgress(
-    {
-      location: ProgressLocation.Notification,
-    },
-    async (progress) => {
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          progress.report({
-            message: `${selectedAvd.name} is being loaded.`,
-          });
-        });
-
-        const command: string = `emulator @${selectedAvd.name} ${additonalEmulatorRunOpts} > /dev/null 2>&1 &`;
-
-        exec(command, async (error, stdout, stderr) => {
-          if (error) {
-            console.error(stderr);
-            window.showErrorMessage(`Failed to run ${command}.`);
-          }
-
-          clearInterval(interval);
-          progress.report({
-            message: `${selectedAvd.name} is successfully loaded.`,
-          });
-
-          setTimeout(() => {
-            resolve(undefined);
-          }, 1000);
-        });
-      });
-    }
-  );
+  const command: string = `emulator @${selectedAvd.name} ${additonalEmulatorRunOpts} > /dev/null 2>&1 &`;
+  await commandWithProgress({
+    command: command,
+    message: `${selectedAvd.name} is being loaded...`,
+    successMessage: `${selectedAvd.name} is successfully loaded.`,
+    failureMessage: `Failed to load ${selectedAvd.name} with the command: ${command}.`,
+  });
 }

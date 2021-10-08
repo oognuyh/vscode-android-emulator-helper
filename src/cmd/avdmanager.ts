@@ -1,9 +1,7 @@
-import { exec } from "child_process";
-import { clearInterval } from "timers";
-import { ProgressLocation, window, workspace } from "vscode";
+import { window, workspace } from "vscode";
 import { Avd } from "../model/avd";
 import { Package } from "../model/package";
-import { showAutocloseMessage } from "../utils";
+import { commandWithProgress, showAutocloseMessage } from "../utils";
 import { getInstalledPackages } from "./sdkmanager";
 
 export async function createAvd() {
@@ -50,7 +48,7 @@ export async function createAvd() {
     },
   });
   if (!newAvdName) {
-    showAutocloseMessage("Can't create AVD without name.");
+    showAutocloseMessage("Can not create AVD without name.");
     return;
   }
 
@@ -59,39 +57,13 @@ export async function createAvd() {
       .getConfiguration("android-emulator-helper")
       .get("avd-creation-opts") || "";
 
-  window.withProgress(
-    {
-      location: ProgressLocation.Notification,
-    },
-    async (progress) => {
-      // create the AVD
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          progress.report({ message: `${newAvdName} is being created.` });
-        }, 1000);
-
-        const command: string = `echo no | avdmanager create avd -n ${newAvdName} -k "${selectedPackage.path}" -f ${additionalAvdCreationOpts}`;
-
-        exec(command, (error, stdout, stderr) => {
-          if (error) {
-            console.error(stderr);
-            window.showErrorMessage(`Failed to execute ${command}.`);
-          }
-
-          clearInterval(interval);
-          progress.report({
-            message: error
-              ? `Failed to create ${newAvdName}.`
-              : `${newAvdName} created successfully.`,
-          });
-
-          setTimeout(() => {
-            resolve(undefined);
-          }, 2000);
-        });
-      });
-    }
-  );
+  const command: string = `echo no | avdmanager create avd -n ${newAvdName} -k "${selectedPackage.path}" -f ${additionalAvdCreationOpts}`;
+  await commandWithProgress({
+    command: command,
+    message: `${newAvdName} is being created...`,
+    successMessage: `${newAvdName} created successfully.`,
+    failureMessage: `Failed to create ${newAvdName} with the command: ${command}.`,
+  });
 }
 
 export async function deleteAvd() {
@@ -115,78 +87,25 @@ export async function deleteAvd() {
     return;
   }
 
-  window.withProgress(
-    {
-      location: ProgressLocation.Notification,
-    },
-    async (progress) => {
-      // delete the AVD
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          progress.report({ message: `${selectedAvd.name} is being deleted.` });
-        }, 1000);
-
-        exec(
-          `avdmanager delete avd -n ${selectedAvd.name}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              window.showErrorMessage(`Failed to delete ${selectedAvd.name}.`);
-            }
-
-            clearInterval(interval);
-            progress.report({
-              message: error
-                ? `Failed to delete ${selectedAvd.name}.`
-                : `${selectedAvd.name} deleted successfully.`,
-            });
-
-            setTimeout(() => {
-              resolve(undefined);
-            }, 2000);
-          }
-        );
-      });
-    }
-  );
+  const command = `avdmanager delete avd -n ${selectedAvd.name}`;
+  await commandWithProgress({
+    command: command,
+    message: `${selectedAvd.name} is being deleted...`,
+    successMessage: `${selectedAvd.name} deleted successfully.`,
+    failureMessage: `Failed to delete ${selectedAvd.name} with the command: ${command}.`,
+  });
 }
 
 export async function getAvailableAvds(): Promise<Avd[] | undefined> {
-  try {
-    const stdout: string = await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-      },
-      async (progress) => {
-        return await new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            progress.report({
-              message: "Loading available AVDs...",
-            });
-          });
+  const stdout: string = await commandWithProgress({
+    command: "avdmanager list avd",
+    message: "Loading available AVDs...",
+  });
 
-          exec("avdmanager list avd", (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              reject();
-            }
+  const availableAvds: Avd[] | undefined = stdout
+    .replace("Available Android Virtual Devices:\n", "")
+    .split("---------\n")
+    .map((rawAvailableAvd) => Avd.from(rawAvailableAvd));
 
-            clearInterval(interval);
-            resolve(stdout);
-          });
-        });
-      }
-    );
-
-    const availableAvds: Avd[] | undefined = stdout
-      .replace("Available Android Virtual Devices:\n", "")
-      .split("---------\n")
-      .map((rawAvailableAvd) => Avd.from(rawAvailableAvd));
-
-    return availableAvds;
-  } catch (error) {
-    console.error(error);
-
-    window.showErrorMessage("command not found: avdmanager");
-  }
+  return availableAvds;
 }

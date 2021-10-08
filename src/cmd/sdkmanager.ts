@@ -1,53 +1,27 @@
 import { exec, execSync } from "child_process";
 import { ProgressLocation, window } from "vscode";
 import { Package } from "../model/package";
-import { showAutocloseMessage } from "../utils";
+import { commandWithProgress, showAutocloseMessage } from "../utils";
 
-export async function getAvaliablePackages(): Promise<Package[] | undefined> {
-  try {
-    const stdout: string = await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-      },
-      (progress) => {
-        return new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            progress.report({
-              message: "Loading available packages...",
-            });
-          });
+export async function getAvailablePackages(): Promise<Package[] | undefined> {
+  const stdout: string = await commandWithProgress({
+    command: `sdkmanager --list`,
+    message: `Loading available packages...`,
+  });
 
-          exec("sdkmanager --list", (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              reject();
-            }
+  // parse
+  const [rawInstalledPackages, rawPackages] = stdout.split(
+    "Available Packages:\n"
+  );
 
-            clearInterval(interval);
-            resolve(stdout);
-          });
-        });
-      }
-    );
-
-    // parse
-    const [rawInstalledPackages, rawPackages] = stdout.split(
-      "Available Packages:\n"
-    );
-
-    return [...rawPackages.matchAll(/.*\|.*\|.*/g)]
-      .slice(2)
-      .map((rawPackage) => rawPackage[0])
-      .map((rawPackage) => Package.from(rawPackage, rawInstalledPackages));
-  } catch (error) {
-    console.error(error);
-
-    window.showErrorMessage("command not found: sdkmanager.");
-  }
+  return [...rawPackages.matchAll(/.*\|.*\|.*/g)]
+    .slice(2)
+    .map((rawPackage) => rawPackage[0])
+    .map((rawPackage) => Package.from(rawPackage, rawInstalledPackages));
 }
 
 export async function installPackages() {
-  const availablePackages: Package[] | undefined = await getAvaliablePackages();
+  const availablePackages: Package[] | undefined = await getAvailablePackages();
   if (!availablePackages || availablePackages.length < 1) {
     showAutocloseMessage(
       "No package available. You have to install the package first."
@@ -161,53 +135,27 @@ export async function installPackages() {
 export async function getInstalledPackages(
   filter: string | undefined = undefined
 ): Promise<Package[] | undefined> {
-  try {
-    // load installed packages
-    const stdout: string = await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-      },
-      (progress) => {
-        return new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            progress.report({
-              message: "Loading installed packages...",
-            });
-          });
+  // load installed packages
+  const stdout: string = await commandWithProgress({
+    command: `sdkmanager --list_installed`,
+    message: `Loading installed packages...`,
+  });
 
-          exec("sdkmanager --list_installed", (error, stdout, stderr) => {
-            if (error) {
-              console.error(stderr);
-              reject();
-            }
+  // parse
+  let installedPackages: Package[] | undefined = [
+    ...stdout.matchAll(/.*\|.*\|.*\|.*\n/g),
+  ]
+    .map((rawInstalledPackage) => rawInstalledPackage[0])
+    .slice(2)
+    .map((rawInstalledPackage) => Package.from(rawInstalledPackage, stdout));
 
-            clearInterval(interval);
-            resolve(stdout);
-          });
-        });
-      }
+  if (filter) {
+    installedPackages = installedPackages.filter((installPackage) =>
+      installPackage.path.includes(filter)
     );
-
-    // parse
-    let installedPackages: Package[] | undefined = [
-      ...stdout.matchAll(/.*\|.*\|.*\|.*\n/g),
-    ]
-      .map((rawInstalledPackage) => rawInstalledPackage[0])
-      .slice(2)
-      .map((rawInstalledPackage) => Package.from(rawInstalledPackage, stdout));
-
-    if (filter) {
-      installedPackages = installedPackages.filter((installPackage) =>
-        installPackage.path.includes(filter)
-      );
-    }
-
-    return installedPackages;
-  } catch (error) {
-    console.error(error);
-
-    window.showErrorMessage("command not found: sdkmanager.");
   }
+
+  return installedPackages;
 }
 
 export async function uninstallPackages() {
@@ -344,7 +292,7 @@ export async function updateAllInstalledPackages() {
             clearInterval(interval);
             progress.report({
               message: stdout.includes("No updates available")
-                ? "No updateds available."
+                ? "No updates available."
                 : "All pacakges updated successfully.",
             });
 
